@@ -1,6 +1,8 @@
 package br.com.brunotrindade.springbootwithkotlin.services
 
+import br.com.brunotrindade.springbootwithkotlin.data.vo.v1.PersonVO
 import br.com.brunotrindade.springbootwithkotlin.exceptions.ResourceNotFoundException
+import br.com.brunotrindade.springbootwithkotlin.mapper.DozerMapper
 import br.com.brunotrindade.springbootwithkotlin.model.Person
 import br.com.brunotrindade.springbootwithkotlin.repository.PersonRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,21 +17,22 @@ class PersonService {
 
     private val logger = Logger.getLogger(PersonService::class.java.name)
 
-    fun findAll(): List<Person> {
+    fun findAll(): List<PersonVO> {
         logger.info("Finding all people")
 
-        return repository.findAll()
+        val result = repository.findAll()
+        return DozerMapper.parseListObjects(result, PersonVO::class.java)
     }
 
-    fun create(person: Person): Person {
+    fun create(person: PersonVO): PersonVO {
         logger.info("Creating one person with name ${person.firstName}!")
+        val entity = DozerMapper.parseObject(person, Person::class.java)
 
-        return repository.save(person)
-
+        return DozerMapper.parseObject(repository.save(entity), PersonVO::class.java)
     }
 
 
-    fun update(person: Person): Person {
+    fun update(person: PersonVO): PersonVO {
         val entity = repository.findById(person.id)
             .orElseThrow {
                 ResourceNotFoundException("No records found for this id!")
@@ -41,7 +44,7 @@ class PersonService {
         entity.gender = person.gender
 
         logger.info("Updating one person with id ${person.id}!")
-        return repository.save(entity)
+        return DozerMapper.parseObject(repository.save(entity), PersonVO::class.java)
     }
 
     fun delete(id: Long) {
@@ -54,13 +57,15 @@ class PersonService {
         repository.delete(entity)
     }
 
-    fun findById(id: Long): Person {
+    fun findById(id: Long): PersonVO {
         logger.info("Finding a person")
 
-        return repository.findById(id)
+        val person = repository.findById(id)
             .orElseThrow {
                 ResourceNotFoundException("No records found for this id!")
             }
+
+        return DozerMapper.parseObject(person, PersonVO::class.java)
     }
 
 }
