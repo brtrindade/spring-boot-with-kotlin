@@ -1,0 +1,13 @@
+version: "3.0"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: rest_with_spring_boot
+    platform: linux/x86_64
+    environment:
+      - POSTGRES_DB=rest_with_spring_boot
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=postgres
+    ports:
+      - "5432:5432"
